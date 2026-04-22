@@ -1,3 +1,17 @@
-.venv
-__pycache__
-.git
+# Byte-compiled files
+__pycache__/
+*.py[cod]
+
+# Environments
+.venv/
+.env
+
+# Docker/CI
+Dockerfile
+docker-compose.yml
+.github/
+.git/
+
+# Metadata
+README.md
+tests/
