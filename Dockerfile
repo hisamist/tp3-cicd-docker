@@ -14,8 +14,11 @@ RUN pip install --no-cache-dir uv && \
 # ========== STAGE 2 : Production ==========
 FROM python:3.12-alpine AS production
 
-# Only the essentials
-RUN apk add --no-cache libpq
+# FIX: Added libgcc and libstdc++ for Pydantic/Rust binaries
+RUN apk add --no-cache libpq libgcc libstdc++
+
+# Optimization: Ensure logs are sent straight to terminal without buffering
+ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
@@ -25,7 +28,7 @@ COPY --from=builder /install/lib/python3.12/site-packages /usr/local/lib/python3
 COPY --from=builder /install/bin /usr/local/bin
 COPY --chown=appuser:appgroup src/ ./src/
 
-# ONE SINGLE LAYER for cleanup to ensure space is actually freed
+# Cleanup layer
 RUN find /usr/local -depth \
     \( \
         \( -type d -a \( -name __pycache__ -o -name test -o -name tests -o -name docs \) \) \
@@ -36,8 +39,7 @@ RUN find /usr/local -depth \
 USER appuser
 EXPOSE 8000
 
-# Simple healthcheck to keep the image light
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:8000/health || exit 1
+    CMD wget --no-verbose --tries=1 --spider http://localhost:8000/health || exit 1
 
 CMD ["python", "-m", "uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
