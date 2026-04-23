@@ -21,11 +21,13 @@ RUN apk add --no-cache libpq libgcc libstdc++
 ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
+# SECURITY: Create a dedicated system group and user to avoid running the app as 'root'
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
 # SURGICAL COPY: Only the site-packages and the binaries
 COPY --from=builder /install/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 COPY --from=builder /install/bin /usr/local/bin
+# Copy source code and ensure the non-root user owns the files
 COPY --chown=appuser:appgroup src/ ./src/
 
 # Cleanup layer
@@ -35,7 +37,7 @@ RUN find /usr/local -depth \
         -o \
         \( -type f -a \( -name '*.pyc' -o -name '*.pyo' -o -name '*.exe' -o -name '*.dist-info' \) \) \
     \) -exec rm -rf '{}' +
-
+# Switch from root to the unprivileged user for security
 USER appuser
 EXPOSE 8000
 
