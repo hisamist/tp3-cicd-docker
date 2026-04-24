@@ -166,11 +166,8 @@ docker compose -f docker-compose.prod.yml stop api-blue
 
 ## Variables d'environnement
 
-| Variable | Description | Défaut |
-|----------|-------------|--------|
-| `DATABASE_URL` | URL PostgreSQL | `postgresql://postgres:secret@db:5432/todo_db` |
-| `REDIS_HOST` | Hôte Redis | `redis` |
-| `REDIS_PORT` | Port Redis | `6379` |
-| `POSTGRES_USER` | Utilisateur PostgreSQL | — |
-| `POSTGRES_PASSWORD` | Mot de passe PostgreSQL | — |
-| `POSTGRES_DB` | Nom de la base | — |
+Copier `.env.example` et renseigner les valeurs :
+
+```bash
+cp .env.example .env
+```
